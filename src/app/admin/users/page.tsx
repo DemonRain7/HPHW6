@@ -29,8 +29,8 @@ export default async function UsersPage() {
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-gray-200 bg-gray-50">
-                <th className="px-4 py-3 font-semibold text-gray-600">Username</th>
-                <th className="px-4 py-3 font-semibold text-gray-600">ID</th>
+                <th className="px-4 py-3 font-semibold text-gray-600">Name</th>
+                <th className="px-4 py-3 font-semibold text-gray-600">Email</th>
                 <th className="px-4 py-3 font-semibold text-gray-600">Superadmin</th>
                 <th className="px-4 py-3 font-semibold text-gray-600">Created</th>
                 <th className="px-4 py-3 font-semibold text-gray-600">Actions</th>
@@ -47,12 +47,10 @@ export default async function UsersPage() {
               {profiles?.map((p) => (
                 <tr key={p.id} className="transition hover:bg-gray-50">
                   <td className="px-4 py-3 font-medium text-gray-900">
-                    {p.username || '(no username)'}
+                    {[p.first_name, p.last_name].filter(Boolean).join(' ') || '(no name)'}
                   </td>
-                  <td className="px-4 py-3">
-                    <code className="rounded bg-gray-100 px-1.5 py-0.5 font-mono text-xs text-gray-600">
-                      {p.id}
-                    </code>
+                  <td className="px-4 py-3 text-sm text-gray-600">
+                    {p.email || '(no email)'}
                   </td>
                   <td className="px-4 py-3">
                     {p.is_superadmin ? (

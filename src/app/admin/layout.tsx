@@ -18,8 +18,8 @@ export default async function AdminLayout({
   // Superadmin gate — every /admin route is behind this check
   const { data: profile } = await supabase
     .from('profiles')
-    .select('is_superadmin, username')
-    .eq('id', user.id)
+    .select('is_superadmin, first_name, last_name, email')
+    .eq('email', user.email)
     .single()
 
   if (!profile?.is_superadmin) {
@@ -87,7 +87,7 @@ export default async function AdminLayout({
         <div className="border-t border-gray-200 p-4">
           <div className="mb-3">
             <p className="truncate text-sm font-medium text-gray-900">
-              {profile.username || user.email}
+              {[profile.first_name, profile.last_name].filter(Boolean).join(' ') || user.email}
             </p>
             <p className="truncate text-xs text-gray-500">{user.email}</p>
           </div>

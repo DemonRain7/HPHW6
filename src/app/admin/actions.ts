@@ -14,7 +14,7 @@ async function requireSuperadmin() {
   const { data: profile } = await supabase
     .from('profiles')
     .select('is_superadmin')
-    .eq('id', user.id)
+    .eq('email', user.email)
     .single()
 
   if (!profile?.is_superadmin) redirect('/login')
