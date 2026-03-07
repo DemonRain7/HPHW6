@@ -38,9 +38,10 @@ export async function toggleSuperadmin(formData: FormData) {
     .from('profiles')
     .update({ is_superadmin: !currentValue })
     .eq('id', profileId)
-  if (error) throw new Error(error.message)
+  if (error) return { error: error.message }
 
   revalidatePath('/admin/users')
+  return { error: null }
 }
 
 // ── Image management (CRUD) ──
@@ -51,7 +52,7 @@ export async function createImage(formData: FormData) {
   const file = formData.get('file') as File | null
   const imageDescription = String(formData.get('image_description') ?? '')
 
-  if (!file || file.size === 0) return
+  if (!file || file.size === 0) return { error: 'No file selected' }
 
   const fileExt = file.name.split('.').pop()
   const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
@@ -65,15 +66,12 @@ export async function createImage(formData: FormData) {
     if (!error) {
       const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(fileName)
       imageUrl = urlData.publicUrl
-      console.log(`Uploaded to bucket "${bucket}":`, imageUrl)
       break
     }
-    console.log(`Bucket "${bucket}" failed:`, error.message)
   }
 
   if (!imageUrl) {
-    console.error('All storage buckets failed. Creating record without file upload.')
-    imageUrl = `https://placeholder.com/${fileName}`
+    return { error: 'All storage buckets failed. Check Supabase Storage settings.' }
   }
 
   const { error: insertError } = await supabase.from('images').insert({
@@ -82,11 +80,10 @@ export async function createImage(formData: FormData) {
     profile_id: user.id,
   })
 
-  if (insertError) {
-    throw new Error(insertError.message)
-  }
+  if (insertError) return { error: insertError.message }
 
   revalidatePath('/admin/images')
+  return { error: null }
 }
 
 export async function updateImage(formData: FormData) {
@@ -98,9 +95,10 @@ export async function updateImage(formData: FormData) {
     .from('images')
     .update({ image_description: imageDescription })
     .eq('id', imageId)
-  if (error) throw new Error(error.message)
+  if (error) return { error: error.message }
 
   revalidatePath('/admin/images')
+  return { error: null }
 }
 
 export async function deleteImage(formData: FormData) {
@@ -108,8 +106,9 @@ export async function deleteImage(formData: FormData) {
   const imageId = String(formData.get('imageId') ?? '')
 
   const { error } = await supabase.from('images').delete().eq('id', imageId)
-  if (error) throw new Error(error.message)
+  if (error) return { error: error.message }
   revalidatePath('/admin/images')
+  return { error: null }
 }
 
 // ── Caption management ──
@@ -123,9 +122,10 @@ export async function toggleCaptionPublic(formData: FormData) {
     .from('captions')
     .update({ is_public: !currentValue })
     .eq('id', captionId)
-  if (error) throw new Error(error.message)
+  if (error) return { error: error.message }
 
   revalidatePath('/admin/captions')
+  return { error: null }
 }
 
 export async function deleteCaption(formData: FormData) {
@@ -133,8 +133,9 @@ export async function deleteCaption(formData: FormData) {
   const captionId = String(formData.get('captionId') ?? '')
 
   const { error } = await supabase.from('captions').delete().eq('id', captionId)
-  if (error) throw new Error(error.message)
+  if (error) return { error: error.message }
   revalidatePath('/admin/captions')
+  return { error: null }
 }
 
 // ── Humor Flavor Mix (read/update) ──
@@ -152,10 +153,11 @@ export async function updateHumorFlavorMix(formData: FormData) {
 
   if (Object.keys(updates).length > 0) {
     const { error } = await supabase.from('humor_flavor_mix').update(updates).eq('id', mixId)
-    if (error) throw new Error(error.message)
+    if (error) return { error: error.message }
   }
 
   revalidatePath('/admin/humor-mix')
+  return { error: null }
 }
 
 // ── Caption Examples (CRUD) ──
@@ -176,9 +178,10 @@ export async function createCaptionExample(formData: FormData) {
     image_id: formData.get('image_id') ? String(formData.get('image_id')) : null,
   }
   const { error } = await supabase.from('caption_examples').insert(insert)
-  if (error) throw new Error(error.message)
+  if (error) return { error: error.message }
   revalidatePath('/admin/caption-examples')
   revalidatePath('/admin/example-captions')
+  return { error: null }
 }
 
 export async function updateCaptionExample(formData: FormData) {
@@ -191,16 +194,18 @@ export async function updateCaptionExample(formData: FormData) {
   if (formData.get('priority')) updates.priority = Number(formData.get('priority'))
   if (formData.get('image_id')) updates.image_id = String(formData.get('image_id'))
   const { error } = await supabase.from('caption_examples').update(updates).eq('id', id)
-  if (error) throw new Error(error.message)
+  if (error) return { error: error.message }
   revalidatePath('/admin/caption-examples')
+  return { error: null }
 }
 
 export async function deleteCaptionExample(formData: FormData) {
   const { supabase } = await requireSuperadmin()
   const id = String(formData.get('id') ?? '')
   const { error } = await supabase.from('caption_examples').delete().eq('id', id)
-  if (error) throw new Error(error.message)
+  if (error) return { error: error.message }
   revalidatePath('/admin/caption-examples')
+  return { error: null }
 }
 
 // ── Terms (CRUD) ──
@@ -221,8 +226,9 @@ export async function createTerm(formData: FormData) {
     term_type_id: formData.get('term_type_id') ? Number(formData.get('term_type_id')) : null,
   }
   const { error } = await supabase.from('terms').insert(insert)
-  if (error) throw new Error(error.message)
+  if (error) return { error: error.message }
   revalidatePath('/admin/terms')
+  return { error: null }
 }
 
 export async function updateTerm(formData: FormData) {
@@ -235,16 +241,18 @@ export async function updateTerm(formData: FormData) {
   if (formData.get('priority')) updates.priority = Number(formData.get('priority'))
   if (formData.get('term_type_id')) updates.term_type_id = Number(formData.get('term_type_id'))
   const { error } = await supabase.from('terms').update(updates).eq('id', id)
-  if (error) throw new Error(error.message)
+  if (error) return { error: error.message }
   revalidatePath('/admin/terms')
+  return { error: null }
 }
 
 export async function deleteTerm(formData: FormData) {
   const { supabase } = await requireSuperadmin()
   const id = String(formData.get('id') ?? '')
   const { error } = await supabase.from('terms').delete().eq('id', id)
-  if (error) throw new Error(error.message)
+  if (error) return { error: error.message }
   revalidatePath('/admin/terms')
+  return { error: null }
 }
 
 // ── LLM Models (CRUD) ──
@@ -263,8 +271,9 @@ export async function createLlmModel(formData: FormData) {
     provider_model_id: String(formData.get('provider_model_id') ?? ''),
     is_temperature_supported: formData.get('is_temperature_supported') === 'true',
   })
-  if (error) throw new Error(error.message)
+  if (error) return { error: error.message }
   revalidatePath('/admin/llm-models')
+  return { error: null }
 }
 
 export async function updateLlmModel(formData: FormData) {
@@ -276,16 +285,18 @@ export async function updateLlmModel(formData: FormData) {
   if (formData.get('provider_model_id')) updates.provider_model_id = String(formData.get('provider_model_id'))
   if (formData.has('is_temperature_supported')) updates.is_temperature_supported = formData.get('is_temperature_supported') === 'true'
   const { error } = await supabase.from('llm_models').update(updates).eq('id', id)
-  if (error) throw new Error(error.message)
+  if (error) return { error: error.message }
   revalidatePath('/admin/llm-models')
+  return { error: null }
 }
 
 export async function deleteLlmModel(formData: FormData) {
   const { supabase } = await requireSuperadmin()
   const id = String(formData.get('id') ?? '')
   const { error } = await supabase.from('llm_models').delete().eq('id', id)
-  if (error) throw new Error(error.message)
+  if (error) return { error: error.message }
   revalidatePath('/admin/llm-models')
+  return { error: null }
 }
 
 // ── LLM Providers (CRUD) ──
@@ -301,8 +312,9 @@ export async function createLlmProvider(formData: FormData) {
     id: nextId,
     name: String(formData.get('name') ?? ''),
   })
-  if (error) throw new Error(error.message)
+  if (error) return { error: error.message }
   revalidatePath('/admin/llm-providers')
+  return { error: null }
 }
 
 export async function updateLlmProvider(formData: FormData) {
@@ -311,16 +323,18 @@ export async function updateLlmProvider(formData: FormData) {
   const updates: Record<string, string> = {}
   if (formData.get('name')) updates.name = String(formData.get('name'))
   const { error } = await supabase.from('llm_providers').update(updates).eq('id', id)
-  if (error) throw new Error(error.message)
+  if (error) return { error: error.message }
   revalidatePath('/admin/llm-providers')
+  return { error: null }
 }
 
 export async function deleteLlmProvider(formData: FormData) {
   const { supabase } = await requireSuperadmin()
   const id = String(formData.get('id') ?? '')
   const { error } = await supabase.from('llm_providers').delete().eq('id', id)
-  if (error) throw new Error(error.message)
+  if (error) return { error: error.message }
   revalidatePath('/admin/llm-providers')
+  return { error: null }
 }
 
 // ── Allowed Signup Domains (CRUD) ──
@@ -336,8 +350,9 @@ export async function createAllowedDomain(formData: FormData) {
     id: nextId,
     apex_domain: String(formData.get('apex_domain') ?? ''),
   })
-  if (error) throw new Error(error.message)
+  if (error) return { error: error.message }
   revalidatePath('/admin/allowed-domains')
+  return { error: null }
 }
 
 export async function updateAllowedDomain(formData: FormData) {
@@ -346,16 +361,18 @@ export async function updateAllowedDomain(formData: FormData) {
   const { error } = await supabase.from('allowed_signup_domains').update({
     apex_domain: String(formData.get('apex_domain') ?? ''),
   }).eq('id', id)
-  if (error) throw new Error(error.message)
+  if (error) return { error: error.message }
   revalidatePath('/admin/allowed-domains')
+  return { error: null }
 }
 
 export async function deleteAllowedDomain(formData: FormData) {
   const { supabase } = await requireSuperadmin()
   const id = String(formData.get('id') ?? '')
   const { error } = await supabase.from('allowed_signup_domains').delete().eq('id', id)
-  if (error) throw new Error(error.message)
+  if (error) return { error: error.message }
   revalidatePath('/admin/allowed-domains')
+  return { error: null }
 }
 
 // ── Whitelist Email Addresses (CRUD) ──
@@ -371,8 +388,9 @@ export async function createWhitelistedEmail(formData: FormData) {
     id: nextId,
     email_address: String(formData.get('email_address') ?? ''),
   })
-  if (error) throw new Error(error.message)
+  if (error) return { error: error.message }
   revalidatePath('/admin/whitelisted-emails')
+  return { error: null }
 }
 
 export async function updateWhitelistedEmail(formData: FormData) {
@@ -381,14 +399,16 @@ export async function updateWhitelistedEmail(formData: FormData) {
   const { error } = await supabase.from('whitelist_email_addresses').update({
     email_address: String(formData.get('email_address') ?? ''),
   }).eq('id', id)
-  if (error) throw new Error(error.message)
+  if (error) return { error: error.message }
   revalidatePath('/admin/whitelisted-emails')
+  return { error: null }
 }
 
 export async function deleteWhitelistedEmail(formData: FormData) {
   const { supabase } = await requireSuperadmin()
   const id = String(formData.get('id') ?? '')
   const { error } = await supabase.from('whitelist_email_addresses').delete().eq('id', id)
-  if (error) throw new Error(error.message)
+  if (error) return { error: error.message }
   revalidatePath('/admin/whitelisted-emails')
+  return { error: null }
 }

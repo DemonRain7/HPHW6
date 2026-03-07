@@ -3,6 +3,7 @@
 import DataTable from './DataTable'
 
 type Row = Record<string, unknown>
+type ActionResult = { error: string | null } | void
 
 interface CrudPageProps {
   data: Row[]
@@ -12,9 +13,9 @@ interface CrudPageProps {
   idField?: string
   createFields?: string[]
   editableFields?: string[]
-  createAction?: (formData: FormData) => Promise<void>
-  updateAction?: (formData: FormData) => Promise<void>
-  deleteAction?: (formData: FormData) => Promise<void>
+  createAction?: (formData: FormData) => Promise<ActionResult>
+  updateAction?: (formData: FormData) => Promise<ActionResult>
+  deleteAction?: (formData: FormData) => Promise<ActionResult>
 }
 
 export default function CrudPage({
@@ -35,7 +36,8 @@ export default function CrudPage({
         for (const [k, v] of Object.entries(values)) {
           fd.append(k, v)
         }
-        await createAction(fd)
+        const result = await createAction(fd)
+        if (result?.error) throw new Error(result.error)
       }
     : undefined
 
@@ -46,7 +48,8 @@ export default function CrudPage({
         for (const [k, v] of Object.entries(updates)) {
           fd.append(k, v)
         }
-        await updateAction(fd)
+        const result = await updateAction(fd)
+        if (result?.error) throw new Error(result.error)
       }
     : undefined
 
@@ -54,7 +57,8 @@ export default function CrudPage({
     ? async (id: string) => {
         const fd = new FormData()
         fd.append('id', id)
-        await deleteAction(fd)
+        const result = await deleteAction(fd)
+        if (result?.error) throw new Error(result.error)
       }
     : undefined
 
