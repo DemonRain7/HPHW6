@@ -90,7 +90,7 @@ export default async function CaptionsPage() {
                   </td>
                   <td className="px-4 py-3 text-xs text-gray-500">
                     {c.created_datetime_utc
-                      ? new Date(c.created_datetime_utc).toLocaleString()
+                      ? new Date(c.created_datetime_utc).toISOString().split('T')[0]
                       : 'N/A'}
                   </td>
                   <td className="px-4 py-3">

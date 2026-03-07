@@ -65,7 +65,7 @@ export default async function UsersPage() {
                   </td>
                   <td className="px-4 py-3 text-xs text-gray-500">
                     {p.created_datetime_utc
-                      ? new Date(p.created_datetime_utc).toLocaleString()
+                      ? new Date(p.created_datetime_utc).toISOString().split('T')[0]
                       : 'N/A'}
                   </td>
                   <td className="px-4 py-3">

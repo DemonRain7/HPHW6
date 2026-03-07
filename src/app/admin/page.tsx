@@ -244,7 +244,7 @@ export default async function DashboardPage() {
                     </span>
                     <span className="text-xs text-gray-400">
                       {v.created_datetime_utc
-                        ? new Date(v.created_datetime_utc).toLocaleDateString()
+                        ? new Date(v.created_datetime_utc).toISOString().split('T')[0]
                         : ''}
                     </span>
                   </div>
