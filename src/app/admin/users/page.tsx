@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { toggleSuperadmin } from '../actions'
+import { toggleSuperadmin } from '../form-actions'
 
 export default async function UsersPage() {
   const supabase = await createClient()

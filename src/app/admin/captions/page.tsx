@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { toggleCaptionPublic, deleteCaption } from '../actions'
+import { toggleCaptionPublic, deleteCaption } from '../form-actions'
 
 export default async function CaptionsPage() {
   const supabase = await createClient()

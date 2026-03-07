@@ -1,6 +1,6 @@
 'use client'
 
-import { updateImage, deleteImage } from '../actions'
+import { updateImage, deleteImage } from '../form-actions'
 
 interface ImageItem {
   id: string

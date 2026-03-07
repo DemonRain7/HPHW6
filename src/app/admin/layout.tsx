@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { signOut } from './actions'
+import { signOut } from './form-actions'
 
 export default async function AdminLayout({
   children,

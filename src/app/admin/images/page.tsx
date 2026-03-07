@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { createImage } from '../actions'
+import { createImage } from '../form-actions'
 import ImageGrid from './ImageGrid'
 
 export default async function ImagesPage() {
